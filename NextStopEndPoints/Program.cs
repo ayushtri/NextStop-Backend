@@ -20,6 +20,15 @@ namespace NextStopEndPoints
             // Add services to the container.
             builder.Services.AddControllers();
 
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost",
+                    builder => builder
+                        .AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader());
+            });
+
 
             builder.Services.AddDbContext<NextStopDbContext>(db => db.UseSqlServer(builder.Configuration.GetConnectionString("ConStr")));
 
@@ -102,7 +111,7 @@ namespace NextStopEndPoints
             }
 
             app.UseHttpsRedirection();
-
+            app.UseCors("AllowLocalhost");
             app.UseAuthentication();
             app.UseAuthorization();
 

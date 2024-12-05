@@ -19,7 +19,6 @@ namespace NextStopEndPoints.Controllers
             _logger = logger;
         }
 
-        // Initiate payment
         [HttpPost("InitiatePayment")]
         [Authorize(Roles = "passenger,operator,admin")]
         public async Task<IActionResult> InitiatePayment([FromBody] InitiatePaymentDTO initiatePaymentDto)
@@ -36,7 +35,6 @@ namespace NextStopEndPoints.Controllers
             }
         }
 
-        // Get payment status
         [HttpGet("GetPaymentStatus/{bookingId}")]
         [Authorize(Roles = "passenger,operator,admin")]
         public async Task<IActionResult> GetPaymentStatus(int bookingId)
@@ -44,6 +42,10 @@ namespace NextStopEndPoints.Controllers
             try
             {
                 var paymentStatus = await _paymentService.GetPaymentStatus(bookingId);
+                if (paymentStatus == null)
+                {
+                    return NotFound($"Payment status for booking ID {bookingId} not found.");
+                }
                 return Ok(paymentStatus);
             }
             catch (Exception ex)
@@ -53,7 +55,7 @@ namespace NextStopEndPoints.Controllers
             }
         }
 
-        // Initiate refund
+
         [HttpPost("InitiateRefund/{bookingId}")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> InitiateRefund(int bookingId)
@@ -61,6 +63,10 @@ namespace NextStopEndPoints.Controllers
             try
             {
                 var paymentStatus = await _paymentService.InitiateRefund(bookingId);
+                if (paymentStatus == null)
+                {
+                    return NotFound($"Refund initiation for booking ID {bookingId} failed.");
+                }
                 return Ok(paymentStatus);
             }
             catch (Exception ex)
@@ -69,5 +75,6 @@ namespace NextStopEndPoints.Controllers
                 return StatusCode(500, "An error occurred while initiating the refund.");
             }
         }
+
     }
 }

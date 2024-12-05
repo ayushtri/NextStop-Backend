@@ -50,9 +50,9 @@ namespace NextStopEndPoints.Controllers
                 // Save the refresh token in the database
                 await _tokenService.SaveRefreshToken(userDTO.Email, refreshToken);
 
-                return Ok(new
+                var registerResponse = new RegisterResponseDTO
                 {
-                    user = new UserDTO
+                    User = new UserDTO
                     {
                         UserId = createdUser.UserId,
                         Name = createdUser.Name,
@@ -62,9 +62,11 @@ namespace NextStopEndPoints.Controllers
                         Role = createdUser.Role,
                         IsActive = createdUser.IsActive
                     },
-                    jwtToken,
-                    refreshToken
-                });
+                    JwtToken = jwtToken,
+                    RefreshToken = refreshToken
+                };
+
+                return Ok(registerResponse);
             }
             catch (Exception ex)
             {
@@ -93,12 +95,19 @@ namespace NextStopEndPoints.Controllers
                     UserId = user.UserId
                 };
 
-                var jwtToken = _tokenService.GenerateToken(tokenDTO); 
-                var refreshToken = _tokenService.GenerateRefreshToken();
+                var jwtToken = _tokenService.GenerateToken(tokenDTO); // Generate the JWT token
+                var refreshToken = _tokenService.GenerateRefreshToken(); // Generate the refresh token
 
-                await _tokenService.SaveRefreshToken(user.Email, refreshToken);
+                await _tokenService.SaveRefreshToken(user.Email, refreshToken); // Save the refresh token
 
-                return Ok(new { jwtToken, refreshToken });
+                // Return jwtToken and refreshToken in the response
+                var response = new LoginResponseDTO
+                {
+                    JwtToken = jwtToken,
+                    RefreshToken = refreshToken
+                };
+
+                return Ok(response); 
             }
             catch (Exception ex)
             {
@@ -106,6 +115,7 @@ namespace NextStopEndPoints.Controllers
                 return BadRequest($"Login failed: {ex.Message}");
             }
         }
+
 
         [HttpPost("renew-tokens")]
         public async Task<IActionResult> RenewTokens([FromBody] string refreshToken)
@@ -140,7 +150,13 @@ namespace NextStopEndPoints.Controllers
                 await _tokenService.RevokeRefreshToken(refreshToken);
                 await _tokenService.SaveRefreshToken(email, newRefreshToken);
 
-                return Ok(new { newJwtToken, newRefreshToken });
+                var response = new RenewTokenResponseDTO
+                {
+                    NewJwtToken = newJwtToken,
+                    NewRefreshToken = newRefreshToken
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

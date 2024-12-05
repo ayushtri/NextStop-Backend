@@ -52,6 +52,21 @@ namespace NextStopEndPoints.Services
         {
             try
             {
+                var bus = await _context.Buses
+                    .Where(b => b.BusId == createSeatsDTO.BusId)
+                    .FirstOrDefaultAsync();
+
+                if (bus == null)
+                {
+                    throw new InvalidOperationException($"Bus with ID {createSeatsDTO.BusId} not found.");
+                }
+
+                if (createSeatsDTO.SeatNumbers.Count > bus.TotalSeats)
+                {
+                    throw new InvalidOperationException($"The number of seat numbers ({createSeatsDTO.SeatNumbers.Count}) exceeds the total available seats ({bus.TotalSeats}) for the bus.");
+                }
+
+
                 var existingSeatNumbers = await _context.Seats
                     .Where(s => s.BusId == createSeatsDTO.BusId && createSeatsDTO.SeatNumbers.Contains(s.SeatNumber))
                     .Select(s => s.SeatNumber)

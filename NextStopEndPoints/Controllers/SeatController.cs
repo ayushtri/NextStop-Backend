@@ -107,6 +107,11 @@ namespace NextStopEndPoints.Controllers
 
                 return CreatedAtAction(nameof(GetSeatsByBusId), new { busId = createSeatsDTO.BusId }, seats);
             }
+            catch (InvalidOperationException ex)
+            {
+                _logger.Warn("Invalid operation while creating seats for bus", ex);
+                return BadRequest(ex.Message); 
+            }
             catch (Exception ex)
             {
                 _logger.Error("Error creating seats for bus", ex);
