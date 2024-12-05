@@ -1,0 +1,6 @@
+@NextStopEndPoints_HostAddress = http://localhost:5185
+
+GET {{NextStopEndPoints_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
