@@ -31,9 +31,9 @@ namespace UnitTesting
         {
             // Arrange
             var searchBusDto = new SearchBusDTO { Origin = "A", Destination = "B", TravelDate = System.DateTime.Now };
-            var buses = new List<ScheduleDTO>
+            var buses = new List<BusSearchResultDTO>
             {
-                new ScheduleDTO { ScheduleId = 1, BusId = 1, BusName = "Bus A", Origin = "A", Destination = "B", DepartureTime = System.DateTime.Now }
+                new BusSearchResultDTO { ScheduleId = 1, BusId = 1, BusName = "Bus A", Origin = "A", Destination = "B", DepartureTime = System.DateTime.Now, AvailableSeats = 20 }
             };
             _bookingServiceMock.Setup(s => s.SearchBus(searchBusDto)).ReturnsAsync(buses);
 
@@ -44,7 +44,7 @@ namespace UnitTesting
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
-            var response = okResult.Value as List<ScheduleDTO>;
+            var response = okResult.Value as List<BusSearchResultDTO>;
             Assert.AreEqual(buses.Count, response.Count);
         }
 

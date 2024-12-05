@@ -19,20 +19,21 @@ namespace NextStopEndPoints.Services
         }
 
         // Search buses by Origin, Destination, and TravelDate
-        public async Task<IEnumerable<ScheduleDTO>> SearchBus(SearchBusDTO searchBusDto)
+        public async Task<IEnumerable<BusSearchResultDTO>> SearchBus(SearchBusDTO searchBusDto)
         {
             try
             {
                 var schedules = await _context.Schedules
                     .Include(s => s.Route)
                     .Include(s => s.Bus)
+                    .Include(s => s.Bus.Seats)
                     .Where(s => s.Route.Origin == searchBusDto.Origin
                              && s.Route.Destination == searchBusDto.Destination
                              && s.DepartureTime.Date == searchBusDto.TravelDate.Date)
                     .ToListAsync();
 
                 // Map to ScheduleDTO
-                return schedules.Select(s => new ScheduleDTO
+                return schedules.Select(s => new BusSearchResultDTO
                 {
                     ScheduleId = s.ScheduleId,
                     BusId = s.BusId,
@@ -43,7 +44,8 @@ namespace NextStopEndPoints.Services
                     Date = s.Date,
                     BusName = s.Bus?.BusName,
                     Origin = s.Route?.Origin,
-                    Destination = s.Route?.Destination
+                    Destination = s.Route?.Destination,
+                    AvailableSeats = s.Bus?.Seats?.Count(seat => seat.IsAvailable) ?? 0
                 });
             }
             catch (Exception ex)
