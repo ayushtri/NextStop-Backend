@@ -229,27 +229,46 @@ namespace UnitTesting
         {
             // Arrange
             var refreshToken = "valid_refresh_token";
+
+            var logoutDto = new LogoutDTO
+            {
+                RefreshToken = refreshToken
+            };
+
             _tokenServiceMock.Setup(t => t.RevokeRefreshToken(refreshToken)).ReturnsAsync(true);
 
             // Act
-            var result = await _controller.Logout(refreshToken);
+            var result = await _controller.Logout(logoutDto);
 
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual("Logged out successfully.", okResult.Value);
+
+            var responseDto = okResult.Value as LogoutResponseDTO;
+            Assert.IsNotNull(responseDto);
+
+            Assert.IsTrue(responseDto.Success);
+            Assert.AreEqual("Logged out successfully.", responseDto.Message);
         }
+
+
 
         [Test]
         public async Task Logout_Failed_ReturnsBadRequest()
         {
             // Arrange
             var refreshToken = "invalid_refresh_token";
+
+            var logoutDto = new LogoutDTO
+            {
+                RefreshToken = refreshToken
+            };
+
             _tokenServiceMock.Setup(t => t.RevokeRefreshToken(refreshToken)).ReturnsAsync(false);
 
             // Act
-            var result = await _controller.Logout(refreshToken);
+            var result = await _controller.Logout(logoutDto);
 
             // Assert
             var badRequestResult = result as BadRequestObjectResult;
@@ -257,5 +276,6 @@ namespace UnitTesting
             Assert.AreEqual(400, badRequestResult.StatusCode);
             Assert.AreEqual("Failed to log out, refresh token not found.", badRequestResult.Value);
         }
+
     }
 }

@@ -20,6 +20,7 @@ namespace NextStopEndPoints
             // Add services to the container.
             builder.Services.AddControllers();
 
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalhost",

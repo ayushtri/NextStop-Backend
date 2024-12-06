@@ -103,6 +103,7 @@ namespace NextStopEndPoints.Controllers
                 // Return jwtToken and refreshToken in the response
                 var response = new LoginResponseDTO
                 {
+                    UserId = user.UserId,
                     JwtToken = jwtToken,
                     RefreshToken = refreshToken
                 };
@@ -167,18 +168,22 @@ namespace NextStopEndPoints.Controllers
 
 
         [HttpPost("logout")]
-        public async Task<IActionResult> Logout([FromBody] string refreshToken)
+        public async Task<IActionResult> Logout([FromBody] LogoutDTO logoutDto)
         {
             try
             {
-                var result = await _tokenService.RevokeRefreshToken(refreshToken);
+                var result = await _tokenService.RevokeRefreshToken(logoutDto.RefreshToken);
 
                 if (!result)
                 {
                     return BadRequest("Failed to log out, refresh token not found.");
                 }
 
-                return Ok("Logged out successfully.");
+                return Ok(new LogoutResponseDTO
+                {
+                    Success = true,
+                    Message = "Logged out successfully."
+                });
             }
             catch (Exception ex)
             {
@@ -186,5 +191,6 @@ namespace NextStopEndPoints.Controllers
                 return BadRequest($"Logout failed: {ex.Message}");
             }
         }
+
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace NextStopEndPoints.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace NextStopEndPoints.DTOs
 {
     public class SearchBusDTO
     {
