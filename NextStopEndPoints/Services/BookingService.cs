@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NextStopEndPoints.Data;
+using log4net;
 
 namespace NextStopEndPoints.Services
 {
@@ -68,6 +69,7 @@ namespace NextStopEndPoints.Services
                     return null;
                 }
 
+
                 // Step 2: Validate the User
                 var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == bookTicketDto.UserId);
 
@@ -81,6 +83,7 @@ namespace NextStopEndPoints.Services
                     .Where(s => s.BusId == schedule.BusId && s.IsAvailable)
                     .CountAsync();
 
+
                 if (availableSeatsCount < bookTicketDto.SelectedSeats.Count)
                 {
                     return null;
@@ -88,8 +91,9 @@ namespace NextStopEndPoints.Services
 
                 // Step 4: Validate Seat Availability
                 var seats = await _context.Seats
-                    .Where(s => bookTicketDto.SelectedSeats.Contains(s.SeatNumber) && s.IsAvailable)
+                    .Where(s => bookTicketDto.SelectedSeats.Contains(s.SeatNumber) && s.BusId == schedule.BusId && s.IsAvailable)
                     .ToListAsync();
+
 
                 if (seats.Count != bookTicketDto.SelectedSeats.Count)
                 {
@@ -98,6 +102,7 @@ namespace NextStopEndPoints.Services
 
                 // Step 5: Calculate Total Fare based on Schedule Fare
                 decimal totalFare = schedule.Fare * bookTicketDto.SelectedSeats.Count;
+
 
                 // Step 6: Create Booking
                 var booking = new Booking
@@ -112,6 +117,7 @@ namespace NextStopEndPoints.Services
                 _context.Bookings.Add(booking);
                 await _context.SaveChangesAsync();
 
+
                 // Step 7: Mark seats as booked (not available anymore)
                 foreach (var seat in seats)
                 {
@@ -119,7 +125,9 @@ namespace NextStopEndPoints.Services
                     seat.BookingId = booking.BookingId;
                     _context.Seats.Update(seat);
                 }
+
                 await _context.SaveChangesAsync();
+
 
                 // Step 8: Return the booking information
                 return new BookingDTO
@@ -138,6 +146,7 @@ namespace NextStopEndPoints.Services
                 throw new Exception($"Error booking ticket: {ex.Message}");
             }
         }
+
 
 
 
