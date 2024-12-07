@@ -54,7 +54,7 @@ namespace NextStopEndPoints.Services
             {
                 Email = email,
                 Token = token,
-                ExpiryDate = DateTime.UtcNow.AddDays(7)
+                ExpiryDate = DateTime.UtcNow.AddMinutes(30)
             };
 
             _context.RefreshTokens.Add(refreshToken);
