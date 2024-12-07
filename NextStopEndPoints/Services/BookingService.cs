@@ -136,7 +136,7 @@ namespace NextStopEndPoints.Services
                     UserId = booking.UserId,
                     ScheduleId = booking.ScheduleId,
                     ReservedSeats = bookTicketDto.SelectedSeats,
-                    TotalFare = booking.TotalFare,
+                    TotalFare = booking.TotalFare,  
                     Status = booking.Status,
                     BookingDate = booking.BookingDate
                 };
@@ -185,6 +185,40 @@ namespace NextStopEndPoints.Services
                 throw new Exception($"Error cancelling booking: {ex.Message}");
             }
         }
+
+        // View booking by user id
+        public async Task<BookingDTO> GetBookingByBookingId(int bookingId)
+        {
+            try
+            {
+                var booking = await _context.Bookings
+                    .Where(b => b.BookingId == bookingId)
+                    .Include(b => b.Seats)
+                    .Include(b => b.Schedule)
+                    .FirstOrDefaultAsync();
+
+                if (booking == null)
+                {
+                    return null; 
+                }
+
+                return new BookingDTO
+                {
+                    BookingId = booking.BookingId,
+                    UserId = booking.UserId,
+                    ScheduleId = booking.ScheduleId,
+                    ReservedSeats = booking.Seats.Select(s => s.SeatNumber).ToList(),
+                    TotalFare = booking.TotalFare,
+                    Status = booking.Status,
+                    BookingDate = booking.BookingDate
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching booking with BookingId {bookingId}: {ex.Message}");
+            }
+        }
+
 
 
         // View all bookings by UserId

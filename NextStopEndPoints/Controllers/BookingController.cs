@@ -68,15 +68,37 @@ namespace NextStopEndPoints.Controllers
 
                 if (result)
                 {
-                    return Ok("Booking cancelled successfully.");
+                    return Ok(new CancelBookingResponseDTO { Success = true, Message = "Booking cancelled successfully." });
                 }
 
-                return NotFound("Booking not found or already cancelled.");
+                return NotFound(new CancelBookingResponseDTO { Success = false, Message = "Booking not found or already cancelled." });
             }
             catch (Exception ex)
             {
                 _logger.Error("Error canceling booking", ex);
-                return StatusCode(500, "An error occurred while canceling the booking.");
+                return StatusCode(500, new CancelBookingResponseDTO { Success = false, Message = "An error occurred while canceling the booking." });
+            }
+        }
+
+        [HttpGet("ViewBookingByBookingId/{bookingId}")]
+        [Authorize(Roles = "passenger,operator,admin")]
+        public async Task<IActionResult> ViewBookingByBookingId(int bookingId)
+        {
+            try
+            {
+                var booking = await _bookingService.GetBookingByBookingId(bookingId);
+
+                if (booking == null)
+                {
+                    return NotFound("Booking not found for this BookingId."); // Return 404 if booking not found
+                }
+
+                return Ok(booking); 
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error fetching booking for BookingId {bookingId}", ex);
+                return StatusCode(500, "An error occurred while fetching the booking.");
             }
         }
 

@@ -123,16 +123,17 @@ namespace UnitTesting
             _paymentServiceMock.Setup(p => p.InitiateRefund(bookingId)).ReturnsAsync(refundStatus);
 
             // Act
-            var result = await _controller.InitiateRefund(bookingId);
+            var result = await _controller.InitiateRefund(new RefundPaymentDTO { BookingId = bookingId });
 
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
-            var response = okResult.Value as PaymentStatusDTO;
+
+            var response = okResult.Value as InitiateRefundResponseDTO;
             Assert.IsNotNull(response);
-            Assert.AreEqual(refundStatus.PaymentId, response.PaymentId);
-            Assert.AreEqual(refundStatus.PaymentStatus, response.PaymentStatus);
+            Assert.IsTrue(response.Success);
+            Assert.IsNull(response.Message); // No message for success
         }
 
         [Test]
@@ -141,17 +142,23 @@ namespace UnitTesting
             // Arrange
             int bookingId = 1;
 
-            _paymentServiceMock.Setup(p => p.InitiateRefund(bookingId)).ReturnsAsync((PaymentStatusDTO)null);
+            _paymentServiceMock.Setup(p => p.InitiateRefund(bookingId))
+                .ReturnsAsync((PaymentStatusDTO)null);
 
             // Act
-            var result = await _controller.InitiateRefund(bookingId);
+            var result = await _controller.InitiateRefund(new RefundPaymentDTO { BookingId = bookingId });
 
             // Assert
             var notFoundResult = result as NotFoundObjectResult;
-            Assert.IsNotNull(notFoundResult); 
-            Assert.AreEqual(404, notFoundResult.StatusCode); 
-            Assert.AreEqual($"Refund initiation for booking ID {bookingId} failed.", notFoundResult.Value); 
+            Assert.IsNotNull(notFoundResult);
+            Assert.AreEqual(404, notFoundResult.StatusCode);
+
+            var response = notFoundResult.Value as InitiateRefundResponseDTO;
+            Assert.IsNotNull(response);
+            Assert.IsFalse(response.Success);
+            Assert.AreEqual($"Refund initiation for booking ID {bookingId} failed.", response.Message);
         }
+
 
     }
 }

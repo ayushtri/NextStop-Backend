@@ -90,7 +90,11 @@ namespace UnitTesting
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual("Booking cancelled successfully.", okResult.Value);
+
+            var response = okResult.Value as CancelBookingResponseDTO;
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Success);
+            Assert.AreEqual("Booking cancelled successfully.", response.Message);
         }
 
         [Test]
@@ -107,7 +111,11 @@ namespace UnitTesting
             var notFoundResult = result as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(404, notFoundResult.StatusCode);
-            Assert.AreEqual("Booking not found or already cancelled.", notFoundResult.Value);
+
+            var response = notFoundResult.Value as CancelBookingResponseDTO;
+            Assert.IsNotNull(response);
+            Assert.IsFalse(response.Success);
+            Assert.AreEqual("Booking not found or already cancelled.", response.Message);
         }
 
         [Test]
@@ -187,5 +195,51 @@ namespace UnitTesting
             Assert.AreEqual(404, notFoundResult.StatusCode);
             Assert.AreEqual("No bookings found for this schedule.", notFoundResult.Value);
         }
+
+        [Test]
+        public async Task ViewBookingByBookingId_Success_ReturnsOk()
+        {
+            // Arrange
+            int bookingId = 1;
+            var booking = new BookingDTO
+            {
+                BookingId = bookingId,
+                UserId = 1,
+                ScheduleId = 1,
+                ReservedSeats = new List<string> { "A1", "A2" },
+                TotalFare = 200.0m,
+                Status = "confirmed",
+                BookingDate = System.DateTime.Now
+            };
+            _bookingServiceMock.Setup(s => s.GetBookingByBookingId(bookingId)).ReturnsAsync(booking);
+
+            // Act
+            var result = await _controller.ViewBookingByBookingId(bookingId);
+
+            // Assert
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult.StatusCode);
+            var response = okResult.Value as BookingDTO;
+            Assert.AreEqual(booking.BookingId, response.BookingId);
+        }
+
+        [Test]
+        public async Task ViewBookingByBookingId_BookingNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            int bookingId = 1;
+            _bookingServiceMock.Setup(s => s.GetBookingByBookingId(bookingId)).ReturnsAsync((BookingDTO)null);
+
+            // Act
+            var result = await _controller.ViewBookingByBookingId(bookingId);
+
+            // Assert
+            var notFoundResult = result as NotFoundObjectResult;
+            Assert.IsNotNull(notFoundResult);
+            Assert.AreEqual(404, notFoundResult.StatusCode);
+            Assert.AreEqual("Booking not found for this BookingId.", notFoundResult.Value);
+        }
+
     }
 }
