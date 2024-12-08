@@ -155,7 +155,13 @@ namespace NextStopEndPoints.Controllers
                     return NotFound($"Bus with ID {id} not found.");
                 }
 
-                return Ok($"Bus with ID {id} deleted successfully.");
+                var response = new DeleteBusResponseDTO
+                {
+                    IsSuccess = true,
+                    Message = $"Bus with ID {id} deleted successfully."
+                };
+
+                return Ok(response);
             }
             catch (Exception ex)
             {
