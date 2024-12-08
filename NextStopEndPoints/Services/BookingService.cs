@@ -129,7 +129,19 @@ namespace NextStopEndPoints.Services
                 await _context.SaveChangesAsync();
 
 
-                // Step 8: Return the booking information
+                // Step 8 : Log the booked seats in SeatLog table
+                var seatLog = new SeatLog
+                {
+                    BookingId = booking.BookingId,
+                    BusId = schedule.BusId,
+                    Seats = string.Join(",", bookTicketDto.SelectedSeats), 
+                    DateBooked = DateTime.Now
+                };
+                _context.SeatLogs.Add(seatLog);
+                await _context.SaveChangesAsync();
+
+
+                // Step 9: Return the booking information
                 return new BookingDTO
                 {
                     BookingId = booking.BookingId,
@@ -288,6 +300,38 @@ namespace NextStopEndPoints.Services
                 throw new Exception($"Error fetching bookings for schedule: {ex.Message}");
             }
         }
+
+        // Get SeatLog by BookingId
+        public async Task<SeatLogDTO> GetSeatLogByBookingId(int bookingId)
+        {
+            try
+            {
+                // Retrieve the seat log based on BookingId
+                var seatLog = await _context.SeatLogs
+                    .Where(sl => sl.BookingId == bookingId)
+                    .FirstOrDefaultAsync();
+
+                if (seatLog == null)
+                {
+                    return null;  // Return null if no seat log is found for the given bookingId
+                }
+
+                // Map SeatLog entity to SeatLogDTO for response
+                return new SeatLogDTO
+                {
+                    SeatLogId = seatLog.SeatLogId,
+                    BookingId = seatLog.BookingId,
+                    BusId = seatLog.BusId,
+                    Seats = seatLog.Seats,  // Comma-separated list of booked seats
+                    DateBooked = seatLog.DateBooked
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching seat log for BookingId {bookingId}: {ex.Message}");
+            }
+        }
+
 
     }
 }

@@ -173,6 +173,64 @@ namespace NextStopEndPoints.Services
             }
         }
 
+        public async Task<IEnumerable<SeatDTO>> DeleteAllSeatsByBusId(int busId)
+        {
+            try
+            {
+                var seats = await _context.Seats
+                    .Where(s => s.BusId == busId)
+                    .ToListAsync();
+
+                if (!seats.Any())
+                {
+                    throw new InvalidOperationException($"No seats found for bus ID {busId}.");
+                }
+
+                _context.Seats.RemoveRange(seats);
+                await _context.SaveChangesAsync();
+
+                return seats.Select(MapToSeatDTO);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error deleting seats for bus ID {busId}: {ex.Message}");
+            }
+        }
+
+        public async Task<IEnumerable<SeatDTO>> ReleaseSeatsByBusId(int busId)
+        {
+            try
+            {
+                // Fetch all seats for the specified bus
+                var seats = await _context.Seats
+                    .Where(s => s.BusId == busId)
+                    .ToListAsync();
+
+                if (!seats.Any())
+                {
+                    throw new InvalidOperationException($"No seats found for bus ID {busId}.");
+                }
+
+                // Update IsAvailable to true and BookingId to null
+                foreach (var seat in seats)
+                {
+                    seat.IsAvailable = true;
+                    seat.BookingId = null;
+                }
+
+                // Save changes to the database
+                _context.Seats.UpdateRange(seats);
+                await _context.SaveChangesAsync();
+
+                // Return updated seats as DTOs
+                return seats.Select(MapToSeatDTO);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error releasing seats for bus ID {busId}: {ex.Message}");
+            }
+        }
+
         private static SeatDTO MapToSeatDTO(Seat seat)
         {
             return new SeatDTO
@@ -185,5 +243,6 @@ namespace NextStopEndPoints.Services
                 BookingId = seat.BookingId
             };
         }
+
     }
 }

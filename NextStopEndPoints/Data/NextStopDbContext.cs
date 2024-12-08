@@ -68,6 +68,8 @@ namespace NextStopEndPoints.Data
         public DbSet<AdminAction> AdminActions { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<SeatLog> SeatLogs { get; set; }
+
 
 
     }

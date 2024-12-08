@@ -103,15 +103,15 @@ namespace NextStopEndPoints.Controllers
 
                 if (route == null)
                 {
-                    return NotFound($"Route with ID {id} not found.");
+                    return NotFound(new DeleteRouteResponseDTO { Success = false, Message = $"Route with ID {id} not found." });
                 }
 
-                return Ok($"Route with ID {id} deleted successfully.");
+                return Ok(new DeleteRouteResponseDTO { Success = true, Message = $"Route with ID {id} deleted successfully." });
             }
             catch (Exception ex)
             {
                 _logger.Error($"Error deleting route with ID {id}", ex);
-                return StatusCode(500, "An error occurred while deleting the route.");
+                return StatusCode(500, new DeleteRouteResponseDTO { Success = false, Message = "An error occurred while deleting the route." });
             }
         }
     }

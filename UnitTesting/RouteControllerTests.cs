@@ -135,7 +135,11 @@ namespace UnitTesting
             var notFoundResult = result as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);
             Assert.AreEqual(404, notFoundResult.StatusCode);
-            Assert.AreEqual($"Route with ID {routeId} not found.", notFoundResult.Value);
+
+            var response = notFoundResult.Value as DeleteRouteResponseDTO;
+            Assert.IsNotNull(response);
+            Assert.IsFalse(response.Success);
+            Assert.AreEqual($"Route with ID {routeId} not found.", response.Message);
         }
 
         [Test]
@@ -158,7 +162,11 @@ namespace UnitTesting
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual($"Route with ID {routeId} deleted successfully.", okResult.Value);
+
+            var response = okResult.Value as DeleteRouteResponseDTO;
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.Success);
+            Assert.AreEqual($"Route with ID {routeId} deleted successfully.", response.Message);
         }
     }
 }

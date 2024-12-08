@@ -162,5 +162,44 @@ namespace NextStopEndPoints.Controllers
                 return StatusCode(500, "An error occurred while deleting the seat.");
             }
         }
+
+        [HttpDelete("DeleteAllSeatsByBusId/{busId}")]
+        [Authorize(Roles = "operator,admin")]
+        public async Task<IActionResult> DeleteAllSeatsByBusId(int busId)
+        {
+            try
+            {
+                var deletedSeats = await _seatService.DeleteAllSeatsByBusId(busId);
+
+                if (deletedSeats == null || !deletedSeats.Any())
+                {
+                    return NotFound($"No seats found for bus ID {busId} to delete.");
+                }
+
+                return Ok($"All seats for Bus ID {busId} deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error deleting all seats for bus ID {busId}", ex);
+                return StatusCode(500, "An error occurred while deleting all seats for the bus.");
+            }
+        }
+
+        [HttpPut("ReleaseSeatsByBusId/{busId}")]
+        [Authorize(Roles = "operator,admin")]
+        public async Task<IActionResult> ReleaseSeatsByBusId(int busId)
+        {
+            try
+            {
+                var releasedSeats = await _seatService.ReleaseSeatsByBusId(busId);
+                return Ok(releasedSeats);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error releasing seats for bus ID {busId}", ex);
+                return StatusCode(500, "An error occurred while releasing the seats.");
+            }
+        }
+
     }
 }

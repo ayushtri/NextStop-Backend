@@ -148,5 +148,27 @@ namespace NextStopEndPoints.Controllers
             }
         }
 
+        [HttpGet("GetSeatLogByBookingId/{bookingId}")]
+        [Authorize(Roles = "passenger,operator,admin")]
+        public async Task<IActionResult> GetSeatLogByBookingId(int bookingId)
+        {
+            try
+            {
+                var seatLog = await _bookingService.GetSeatLogByBookingId(bookingId);
+
+                if (seatLog == null)
+                {
+                    return NotFound($"No seat log found for BookingId {bookingId}.");
+                }
+
+                return Ok(seatLog);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Error fetching seat log for BookingId {bookingId}", ex);
+                return StatusCode(500, "An error occurred while fetching the seat log.");
+            }
+        }
+
     }
 }

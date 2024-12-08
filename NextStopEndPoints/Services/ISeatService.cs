@@ -11,5 +11,7 @@ namespace NextStopEndPoints.Services
         Task<SeatDTO> UpdateSeatBySeatNumberAndBusId(string seatNumber, int busId, UpdateSeatDTO updateSeatDTO);
         Task<SeatDTO> DeleteSeatBySeatNumberAndBusId(string seatNumber, int busId);
         Task<IEnumerable<SeatDTO>> GetAvailableSeatsByBusId(int busId);
+        Task<IEnumerable<SeatDTO>> DeleteAllSeatsByBusId(int busId);
+        Task<IEnumerable<SeatDTO>> ReleaseSeatsByBusId(int busId);
     }
 }
